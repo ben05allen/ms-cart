@@ -1,91 +1,99 @@
 <script setup lang="ts">
-import { mapActions, mapGetters } from "vuex";
+
+import { ref, reactive } from "vue";
 import ListHeader from "@/components/list-header.vue";
 import Modal from "@/components/modal.vue";
 import ProductDetail from "./product-detail.vue";
 import ProductList from "./product-list.vue";
 
-export default {
-  name: "Products",
-  data() {
-    return {
-      errorMessage: "",
-      productToDelete: null,
-      message: "",
-      routePath: "/products",
-      selected: null,
-      showModal: false,
-      title: "Products",
-    };
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+};
+
+const emptyProduct: Product = {
+  id: 0,
+  name: "",
+  description: "",
+};
+
+const errorMessage = ref("");
+const productToDelete = ref(emptyProduct);
+const message = ref("");
+const routePath = ref("/products");
+const selected = ref(emptyProduct);
+const showModal = ref(false);
+const title = ref("Products");
+
+
+
+async function created() {
+    await getProducts();
   },
-  components: {
-    ListHeader,
-    ProductList,
-    ProductDetail,
-    Modal,
-  },
-  async created() {
-    await this.getProducts();
-  },
+
   computed: {
     ...mapGetters("products", { products: "products" }),
   },
-  methods: {
+
     ...mapActions("products", [
       "getProductsAction",
       "deleteProductAction",
       "addProductAction",
       "updateProductAction",
     ]),
-    askToDelete(product) {
-      this.productToDelete = product;
-      this.showModal = true;
-      if (this.productToDelete.name) {
-        this.message = `Would you like to delete ${this.productToDelete.name}?`;
-        captains.log(this.message);
+
+const askToDelete = (product: Product) => {
+      productToDelete.value = product;
+      showModal.value = true;
+      if (productToDelete.value.name) {
+        message.value = `Would you like to delete ${productToDelete.value.name}?`;
+        console.log(message.value);
       }
     },
-    clear() {
-      this.selected = null;
-    },
-    closeModal() {
-      this.showModal = false;
-    },
-    deleteProduct() {
-      this.closeModal();
-      if (this.productToDelete) {
-        captains.log(
-          `You said you want to delete ${this.productToDelete.name}`
+
+const clear = () => {
+      selected.value = emptyProduct;
+    };
+
+const closeModal = () => {
+      showModal.value = false;
+    }
+
+const deleteProduct = () => {
+      closeModal();
+      if (productToDelete && productToDelete.value.name) {
+        console.log(
+          `You said you want to delete ${productToDelete.value.name}`
         );
-        this.deleteProductAction(this.productToDelete);
+        deleteProductAction(productToDelete);
       }
-      this.clear();
-    },
-    enableAddMode() {
-      this.selected = {};
-    },
+      clear();
+    };
+
+const enableAddMode = () => {
     async getProducts() {
-      this.errorMessage = undefined;
       try {
-        await this.getProductsAction();
+        await getProductsAction();
       } catch (error) {
-        this.errorMessage = "Unauthorized";
+        errorMessage.value = "Unauthorized";
       }
-      this.clear();
-    },
-    save(product) {
-      captains.log("product changed", product);
+      clear();
+    }
+  };
+
+const save = (product: Product) => {
+      console.log("product changed", product);
       if (product.id) {
-        this.updateProductAction(product);
+        updateProductAction(product);
       } else {
-        this.addProductAction(product);
+        addProductAction(product);
       }
+    };
+
+const select = (product: Product) => {
+      selected.value = product;
     },
-    select(product) {
-      this.selected = product;
-    },
-  },
-};
 </script>
 
 <template>

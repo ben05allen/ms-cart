@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import ButtonFooter from "@/components/button-footer.vue";
-
-import { ref, reactive, watch } from "vue";
-
-const addMode = ref(false);
-const editingProduct = reactive({});
+import { ref, reactive, watch, PropType } from "vue";
 
 type Product = {
   id: number;
@@ -12,10 +8,18 @@ type Product = {
   description: string;
 };
 
+const emptyProduct: Product = {
+  id: 0,
+  name: "",
+  description: "",
+};
+
+const addMode = ref(false);
+const editingProduct = ref(emptyProduct);
+
 const props = defineProps({
   product: {
-    type: Object,
-    default() {},
+    type: Object as PropType<Product>,
   },
 });
 
@@ -30,17 +34,15 @@ const saveProduct = () => {
   clear();
 };
 
-watch: {
-    product() {
-      if (this.product && this.product.id) {
-        this.editingProduct = { ...this.product };
-        this.addMode = false;
-      } else {
-        this.editingProduct = { id: undefined, name: "", description: "" };
-        this.addMode = true;
-      }
-    },
+watch(editingProduct, () => {
+  if (product && product.id) {
+    editingProduct.value = { ...product };
+    addMode.value = false;
+  } else {
+    editingProduct.value = emptyProduct;
+    addMode.value = true;
   }
+});
 </script>
 
 <template>
