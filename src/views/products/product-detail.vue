@@ -1,27 +1,18 @@
 <script setup lang="ts">
 import ButtonFooter from "@/components/button-footer.vue";
-import { ref, reactive, watch, PropType } from "vue";
+import { ref, watch } from "vue";
 
-type Product = {
+interface Product {
   id: number;
   name: string;
   description: string;
-};
+  quantity: number;
+}
 
-const emptyProduct: Product = {
-  id: 0,
-  name: "",
-  description: "",
-};
+const product = defineProps<Product>();
 
 const addMode = ref(false);
-const editingProduct = ref(emptyProduct);
-
-const props = defineProps({
-  product: {
-    type: Object as PropType<Product>,
-  },
-});
+const editingProduct = ref(product);
 
 const emits = defineEmits(["unselect", "save"]);
 
@@ -39,7 +30,7 @@ watch(editingProduct, () => {
     editingProduct.value = { ...product };
     addMode.value = false;
   } else {
-    editingProduct.value = emptyProduct;
+    editingProduct.value = product;
     addMode.value = true;
   }
 });
